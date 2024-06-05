@@ -1,5 +1,3 @@
-package movieTicket;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,19 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class db1 {
-	// ê´€ë¦¬ì ê¶Œí•œ
+	// °ü¸®ÀÚ ±ÇÇÑ
 	public static int schemaInit() {
 		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root","1234");
              Statement statement = connection.createStatement()) {
-            // SQL íŒŒì¼ ê²½ë¡œ
+            // SQL ÆÄÀÏ °æ·Î
             String sqlFilePath = "initTables_movies.sql";
 
-            // SQL íŒŒì¼ ì½ê¸°
+            // SQL ÆÄÀÏ ÀĞ±â
             StringBuilder sqlQueries = new StringBuilder();
             try (BufferedReader br = new BufferedReader(new FileReader(sqlFilePath))) {
                 String line;
                 while ((line = br.readLine()) != null) {
-                    // ì£¼ì„ ì œê±°
+                    // ÁÖ¼® Á¦°Å
                     if (!line.trim().startsWith("--")) {
                         sqlQueries.append(line);
                         sqlQueries.append("\n");
@@ -37,7 +35,7 @@ public class db1 {
                 return -1;
             }
 
-            // ì¿¼ë¦¬ ì‹¤í–‰
+            // Äõ¸® ½ÇÇà
             String[] queries = sqlQueries.toString().split(";");
             for (String query : queries) {
                 if (!query.trim().isEmpty()) {
@@ -45,7 +43,7 @@ public class db1 {
                 }
             }
 
-            System.out.println("SQL íŒŒì¼ ì‹¤í–‰ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
+            System.out.println("SQL ÆÄÀÏ ½ÇÇàÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù.");
     		return 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,9 +57,9 @@ public class db1 {
 		}
 		Statement stmt = null;
 		try {
-			Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL ë“œë¼ì´ë²„ ë¡œë“œ
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root","1234"); // JDBC ì—°ê²°
-			System.out.println("DB ì—°ê²° ì™„ë£Œ");
+			Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL µå¶óÀÌ¹ö ·Îµå
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root","1234"); // JDBC ¿¬°á
+			System.out.println("DB ¿¬°á ¿Ï·á");
 			stmt = conn.createStatement();
 			
 			
@@ -81,7 +79,7 @@ public class db1 {
                     + "        (13, 'Eternal Quest', 1, 'Logan Carter,Natalie Bryant', 'Benjamin Perry,Victoria Russell,Michael Wood', 'Historical Fantasy', 'A warrior from an ancient civilization is given a chance at immortality if he can complete a series of impossible tasks, but he soon learns that the true quest is one of the heart.', '2023-12-01', 4),"
                     + "       (14, 'The Lost Chronicles', 1, 'Ryan Hughes,Grace Foster', 'Elijah Powell,Sophia Henderson,Hunter Jenkins', 'Action Adventure', 'A journalist stumbles upon a series of hidden documents that reveal a conspiracy spanning centuries, thrusting her into a dangerous adventure to expose the truth.', '2023-12-25', 4);";
 			stmt.executeUpdate(insertMovieData);
-			System.out.println("movie ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("movie µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			String insertRoomData = "INSERT INTO room (roomId, seatCol, seatRow, isUsed) "
 			+ "VALUES (1, 10, 10, 1),"
 			+ "       (2, 8, 8, 0),"
@@ -96,7 +94,7 @@ public class db1 {
 			+ "       (11, 17, 17, 1),"
 			+ "       (12, 11, 11, 1);";
 			stmt.executeUpdate(insertRoomData);
-			System.out.println("room ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("room µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			String insertScheduleData = "INSERT INTO showSchedule (showScheduleId, movieId, roomId, showingStartDay, dayType, showRound, startTime)"
 					+ "VALUES (1, 1, 12, '2023-03-01', 'WED', 1, '08:45:00'),"
@@ -117,7 +115,7 @@ public class db1 {
 					+ "       (16, 5, 11, '2023-06-09', 'FRI', 1, '23:10:00');";
 
 			stmt.executeUpdate(insertScheduleData);
-			System.out.println("showSchedule ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("showSchedule µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			String insertUserInfoData = "INSERT INTO userInfo (userId, name, phoneNumber, addressEmail) VALUES ('apple124', 'John Doe', '01012345678', 'john.doe@gmail.com'),"
 					+ "('orange567', 'Emily Johnson', '01023456789', 'emily.johnson@yahoo.com'),"
@@ -133,7 +131,7 @@ public class db1 {
 					+ "('watermelon567', 'Karen Rodriguez', '01023456789', 'karen.rodriguez@rocketmail.com'),"
 					+ "('user1', 'Sejong Tester', '01011111111', 'user1234@naver.com');";
 			stmt.executeUpdate(insertUserInfoData);
-			System.out.println("userInfo ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("userInfo µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			String insertPayInfoData = "INSERT INTO payInfo (payId, payMethod, payState, price, userId, payDate) VALUES (1, 'CreditCard', 1, 9000, 'apple124', '2023-05-01'),"
 					+ "(2, 'Cash', 0, 8000, 'orange567', '2023-05-10'),"
@@ -151,7 +149,7 @@ public class db1 {
 					+ "(14, 'Cash', 0, 10000, 'orange567', '2023-08-08'),"
 					+ "(15, 'PayPal', 1, 16000, 'banana890', '2023-08-15');";
 			stmt.executeUpdate(insertPayInfoData);
-			System.out.println("payInfo ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("payInfo µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			String insertSeatData = "INSERT INTO seat (seatId, roomId, isUsed, colX, rowY, showScheduleId)"
 					+ "VALUES (1, 1, 1, 8, 3, 4),"
@@ -175,7 +173,7 @@ public class db1 {
 					+ "       (19, 10, 1, 8, 7, 15),"
 					+ "       (20, 11, 1, 12, 12, 16);";
 			stmt.executeUpdate(insertSeatData);
-			System.out.println("seat ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("seat µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			String insertTicketData = "INSERT INTO ticket (ticketId, seatId, roomId, showScheduleId, payId, isPrinted, averageSale, price)"
 					+ "VALUES (1, 1, 1, 4, 1, 1, 10000, 9000),"
@@ -200,15 +198,15 @@ public class db1 {
 					+ "       (20, 20, 11, 16, 15, 1, 12000, 8000);";
 
 			stmt.executeUpdate(insertTicketData);
-			System.out.println("ticket ë°ì´í„° ì¶”ê°€ ì™„ë£Œ");
+			System.out.println("ticket µ¥ÀÌÅÍ Ãß°¡ ¿Ï·á");
 			
 			
 			return 0;
 		} catch (ClassNotFoundException e) {
-			System.out.println("JDBC ë“œë¼ì´ë²„ ë¡œë“œ ì˜¤ë¥˜");
+			System.out.println("JDBC µå¶óÀÌ¹ö ·Îµå ¿À·ù");
 			return -1;
 		} catch (SQLException e) {
-			System.out.println("DB ì—°ê²° ì˜¤ë¥˜");
+			System.out.println("DB ¿¬°á ¿À·ù");
 			System.out.println(e.getMessage());
 			return -1;
 		}
@@ -216,21 +214,21 @@ public class db1 {
 	
 	public static List<String> printAllTable() {
 		List<String> returnResult = new ArrayList<>();
-		String jdbcUrl = "jdbc:mysql://localhost:3306/db1"; // ë°ì´í„°ë² ì´ìŠ¤ URL
-        String jdbcUser = "root"; // MySQL ì‚¬ìš©ì ì´ë¦„
-        String jdbcPassword = "1234"; // MySQL ì‚¬ìš©ì ë¹„ë°€ë²ˆí˜¸
+		String jdbcUrl = "jdbc:mysql://localhost:3306/db1"; // µ¥ÀÌÅÍº£ÀÌ½º URL
+        String jdbcUser = "root"; // MySQL »ç¿ëÀÚ ÀÌ¸§
+        String jdbcPassword = "1234"; // MySQL »ç¿ëÀÚ ºñ¹Ğ¹øÈ£
         String query;
         String format;
         String header;
 
-        // ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²°
+        // µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á
         try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
-            // SELECT ì¿¼ë¦¬ ì‹¤í–‰
-            query = "SELECT * FROM movie"; // í…Œì´ë¸” ì´ë¦„ì„ ì›í•˜ëŠ” ëŒ€ë¡œ ë³€ê²½í•˜ì„¸ìš”
+            // SELECT Äõ¸® ½ÇÇà
+            query = "SELECT * FROM movie"; // Å×ÀÌºí ÀÌ¸§À» ¿øÇÏ´Â ´ë·Î º¯°æÇÏ¼¼¿ä
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
 
-                // í…Œì´ë¸” í—¤ë” ì¶œë ¥
+                // Å×ÀÌºí Çì´õ Ãâ·Â
                 format = "| %-8s | %-20s | %-10s | %-40s | %-60s | %-30s | %-50s | %-10s | %-4s |%n";
                 System.out.format(format, "MovieID", "MovieName", "MovieGrade", "Director", "Actor", "Genre", "MovieSummary", "OpenDate", "Rate");
                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
@@ -238,7 +236,7 @@ public class db1 {
                 header = String.format(format, "MovieID", "MovieName", "MovieGrade", "Director", "Actor", "Genre", "MovieSummary", "OpenDate", "Rate");
                 returnResult.add(header);
                 returnResult.add("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-                // ê²°ê³¼ ì¶œë ¥
+                // °á°ú Ãâ·Â
                 while (resultSet.next()) {
                     int movieId = resultSet.getInt("movieId");
                     String movieName = resultSet.getString("movieName");
@@ -256,11 +254,11 @@ public class db1 {
                     
                 }
             }
-            query = "SELECT * FROM room"; // í…Œì´ë¸” ì´ë¦„ì„ ì›í•˜ëŠ” ëŒ€ë¡œ ë³€ê²½í•˜ì„¸ìš”
+            query = "SELECT * FROM room"; // Å×ÀÌºí ÀÌ¸§À» ¿øÇÏ´Â ´ë·Î º¯°æÇÏ¼¼¿ä
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
 
-                // í…Œì´ë¸” í—¤ë” ì¶œë ¥
+                // Å×ÀÌºí Çì´õ Ãâ·Â
                 format = "| %-8s | %-8s | %-8s | %-6s |%n";
                 header = String.format(format, "RoomID", "SeatCol", "SeatRow", "IsUsed");;
                 System.out.println(header);
@@ -268,7 +266,7 @@ public class db1 {
 
                 returnResult.add(header);
                 returnResult.add("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-                // ê²°ê³¼ ì¶œë ¥
+                // °á°ú Ãâ·Â
                 while (resultSet.next()) {
                 	int roomId = resultSet.getInt("roomId");
                     int seatCol = resultSet.getInt("seatCol");
@@ -323,7 +321,7 @@ public class db1 {
                 returnResult.add(header);
                 returnResult.add("-------------------------------------------------------------------------------------------");
 
-                // ê²°ê³¼ ì¶œë ¥ ë° ì €ì¥
+                // °á°ú Ãâ·Â ¹× ÀúÀå
                 while (resultSet.next()) {
                     String userId = resultSet.getString("userId");
                     String name = resultSet.getString("name");
@@ -336,11 +334,11 @@ public class db1 {
                     System.out.println(row);
                 }
             }
-            query = "SELECT * FROM payInfo"; // í…Œì´ë¸” ì´ë¦„ì„ ì›í•˜ëŠ” ëŒ€ë¡œ ë³€ê²½í•˜ì„¸ìš”
+            query = "SELECT * FROM payInfo"; // Å×ÀÌºí ÀÌ¸§À» ¿øÇÏ´Â ´ë·Î º¯°æÇÏ¼¼¿ä
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
 
-                // í…Œì´ë¸” í—¤ë” ì¶œë ¥ ë° ì €ì¥
+                // Å×ÀÌºí Çì´õ Ãâ·Â ¹× ÀúÀå
                 format = "| %-8s | %-20s | %-8s | %-8s | %-20s | %-10s |%n";
                 header = String.format(format, "PayID", "PayMethod", "PayState", "Price", "UserID", "PayDate");
                 System.out.println(header);
@@ -349,7 +347,7 @@ public class db1 {
                 returnResult.add(header);
                 returnResult.add("--------------------------------------------------------------------------");
 
-                // ê²°ê³¼ ì¶œë ¥ ë° ì €ì¥
+                // °á°ú Ãâ·Â ¹× ÀúÀå
                 while (resultSet.next()) {
                     int payId = resultSet.getInt("payId");
                     String payMethod = resultSet.getString("payMethod");
@@ -365,11 +363,11 @@ public class db1 {
                 }
             }
             
-            query = "SELECT * FROM seat"; // í…Œì´ë¸” ì´ë¦„ì„ ì›í•˜ëŠ” ëŒ€ë¡œ ë³€ê²½í•˜ì„¸ìš”
+            query = "SELECT * FROM seat"; // Å×ÀÌºí ÀÌ¸§À» ¿øÇÏ´Â ´ë·Î º¯°æÇÏ¼¼¿ä
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
 
-                // í…Œì´ë¸” í—¤ë” ì¶œë ¥ ë° ì €ì¥
+                // Å×ÀÌºí Çì´õ Ãâ·Â ¹× ÀúÀå
                 format = "| %-8s | %-8s | %-6s | %-5s | %-5s | %-15s |%n";
                 header = String.format(format, "SeatID", "RoomID", "IsUsed", "ColX", "RowY", "ShowScheduleID");
                 System.out.println(header);
@@ -378,14 +376,14 @@ public class db1 {
                 returnResult.add(header);
                 returnResult.add("-------------------------------------------------------------");
 
-                // ê²°ê³¼ ì¶œë ¥ ë° ì €ì¥
+                // °á°ú Ãâ·Â ¹× ÀúÀå
                 while (resultSet.next()) {
                     int seatId = resultSet.getInt("seatId");
                     int roomId = resultSet.getInt("roomId");
                     int isUsed = resultSet.getInt("isUsed");
                     int colX = resultSet.getInt("colX");
                     int rowY = resultSet.getInt("rowY");
-                    int showScheduleId = resultSet.getInt("showScheculeId");
+                    int showScheduleId = resultSet.getInt("showScheduleId");
 
                     String row = String.format(format, seatId, roomId, isUsed, colX, rowY, showScheduleId);
                     returnResult.add(row);
@@ -394,11 +392,11 @@ public class db1 {
                 }
             }
             
-            query = "SELECT * FROM ticket"; // í…Œì´ë¸” ì´ë¦„ì„ ì›í•˜ëŠ” ëŒ€ë¡œ ë³€ê²½í•˜ì„¸ìš”
+            query = "SELECT * FROM ticket"; // Å×ÀÌºí ÀÌ¸§À» ¿øÇÏ´Â ´ë·Î º¯°æÇÏ¼¼¿ä
             try (Statement statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(query);
 
-                // í…Œì´ë¸” í—¤ë” ì¶œë ¥ ë° ì €ì¥
+                // Å×ÀÌºí Çì´õ Ãâ·Â ¹× ÀúÀå
                 format = "| %-8s | %-14s | %-8s | %-8s | %-8s | %-10s | %-12s | %-6s |%n";
                 header = String.format(format, "TicketID", "ShowScheduleID", "RoomID", "SeatID", "PayID", "IsPrinted", "AverageSale", "Price");
                 System.out.println(header);
@@ -407,7 +405,7 @@ public class db1 {
                 returnResult.add(header);
                 returnResult.add("------------------------------------------------------------------------------------------------------");
 
-                // ê²°ê³¼ ì¶œë ¥ ë° ì €ì¥
+                // °á°ú Ãâ·Â ¹× ÀúÀå
                 while (resultSet.next()) {
                     int ticketId = resultSet.getInt("ticketId");
                     int showScheduleId = resultSet.getInt("showScheduleId");
@@ -434,34 +432,50 @@ public class db1 {
 	
 	public static int delete(String tableName, String condition) {
 		String query = "DELETE FROM " + tableName + " WHERE " + condition + ";";
+		int rowsAffected;
 	    try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root", "1234");
 	         PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
-        	int rowsAffected = preparedStatement.executeUpdate();
+        	rowsAffected = preparedStatement.executeUpdate();
         	System.out.println("Deleted " + rowsAffected + " rows from table " + tableName);
 	        
 	    } catch (SQLException e) {
 	        //e.printStackTrace();
 	        return -1;
 	    }
-		return 0;
+		return rowsAffected; //»èÁ¦ ½Ã »èÁ¦µÈ row ¼ö(0 ÀÌ»óÀÌ Á¤»ó ½ÇÇà)
 	}
 	
-	// ì‚¬ìš©ì ê¶Œí•œ
+	public static int update(String tableName, String setString, String condition) {
+		String query = "Update " + tableName + " Set "+ setString +" WHERE " + condition + ";";
+	    try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root", "1234");
+	         PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+        	int rowsAffected = preparedStatement.executeUpdate();
+        	System.out.println("Updated " + rowsAffected + " rows from table " + tableName);
+	        
+	    } catch (SQLException e) {
+	        return -1;
+	    }
+		return 0;
+	}
+	// »ç¿ëÀÚ ±ÇÇÑ
+	
+	
 	
 	public static void main (String[] args) {
 		
 		init();
 		//delete("movie", "movie.movieId=3");
+		//update("movie", "movie.movieName = \'test1\'", "movie.movieId = 3");
 		//printAllTable();
 		
-		
 		/*
-		 * try { Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL ë“œë¼ì´ë²„ ë¡œë“œ Connection
+		 * try { Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL µå¶óÀÌ¹ö ·Îµå Connection
 		 * conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1",
-		 * "root","1234"); // JDBC ì—°ê²° System.out.println("DB ì—°ê²° ì™„ë£Œ"); } catch
-		 * (ClassNotFoundException e) { System.out.println("JDBC ë“œë¼ì´ë²„ ë¡œë“œ ì˜¤ë¥˜"); } catch
-		 * (SQLException e) { System.out.println("DB ì—°ê²° ì˜¤ë¥˜"); }
+		 * "root","1234"); // JDBC ¿¬°á System.out.println("DB ¿¬°á ¿Ï·á"); } catch
+		 * (ClassNotFoundException e) { System.out.println("JDBC µå¶óÀÌ¹ö ·Îµå ¿À·ù"); } catch
+		 * (SQLException e) { System.out.println("DB ¿¬°á ¿À·ù"); }
 		 */
 	}
 }
