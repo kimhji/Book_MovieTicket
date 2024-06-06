@@ -32,7 +32,7 @@ USE `db1` ;
 CREATE TABLE IF NOT EXISTS `db1`.`movie` (
   `movieId` INT AUTO_INCREMENT NOT NULL,
   `movieName` VARCHAR(20) NULL,
-  `moveGrade` INT NULL COMMENT '0 : 전체 관람가 \n1 : 12세 이상 관람가\n2 : 15세 이상 관람가\n3 : 청소년 관람불가\n4  : 제한관람가',
+  `movieGrade` INT NULL COMMENT '0 : 전체 관람가 \n1 : 12세 이상 관람가\n2 : 15세 이상 관람가\n3 : 청소년 관람불가\n4  : 제한관람가',
   `director` VARCHAR(40) NULL,
   `actor` VARCHAR(60) NULL,
   `genre` VARCHAR(30) NULL,

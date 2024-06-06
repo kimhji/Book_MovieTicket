@@ -12,6 +12,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,50 +34,63 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.table.DefaultTableModel;
 
 //import db1;
 
 public class ui {
 	//Login UI
-		class LoginUI extends JFrame{
-			JButton AdminButton,UserButton;
+	class LoginUI extends JFrame implements ActionListener{
+		JButton AdminButton,UserButton;
 
-			LoginUI(){
-				setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				setSize(300, 200);
-				setTitle("Login Page");
-				JPanel panel = new JPanel(new GridLayout(2, 1, 10, 10));
-				
-				Container c = getContentPane();
-		        c.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 50)); // 세로로 정렬
+		LoginUI(){
+			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			setSize(300, 200);
+			setTitle("Login Page");
+			JPanel panel = new JPanel(new GridLayout(2, 1, 10, 10));
+			
+			Container c = getContentPane();
+	        c.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 50)); // 세로로 정렬
 
-		        AdminButton = new JButton("관리자 로그인");
-		        UserButton = new JButton("사용자 로그인");
-		        // AdminButton의 ActionListener
-		        AdminButton.addActionListener(new ActionListener() {
-		            @Override
-		            public void actionPerformed(ActionEvent e) {
-		            	//관리자 UI 오픈 
-		            }
-		        });
+	        AdminButton = new JButton("관리자 로그인");
+	        UserButton = new JButton("사용자 로그인");
+	        // AdminButton의 ActionListener
+	        AdminButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	            	//관리자 UI 오픈 
+	            	 AdminUI adminUI = new AdminUI();
+	                 adminUI.setVisible(true);
+	            }
+	        });
 
-		        // UserButton의 ActionListener
-		        UserButton.addActionListener(new ActionListener() {
-		            @Override
-		            public void actionPerformed(ActionEvent e) {
-		            	//사용자 UI 오픈 
-		            }
-		        });
+	        // UserButton의 ActionListener
+	        UserButton.addActionListener(new ActionListener() {
+	            @Override
+	            public void actionPerformed(ActionEvent e) {
+	            	//사용자 UI 오픈 
+	            	 UsermainUI userUI = new UsermainUI();
+	                 userUI.setVisible(true);
+	            	
+	            }
+	        });
 
-				panel.add(AdminButton);
-				panel.add(UserButton);
-		        getContentPane().add(panel);
+			panel.add(AdminButton);
+			panel.add(UserButton);
+	        getContentPane().add(panel);
 
-				setVisible(true);
+			setVisible(true);
 
-			}
 		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			
+		}
+	}
 		//Admin UI
 		//콤보 박스 선택하면 화면 비율 달라지는거 조정해야됨 
 		class AdminUI extends JFrame  implements ActionListener {
@@ -439,9 +454,10 @@ public class ui {
 		}
 
 		// usermain UI
-		class UsermainUI extends JFrame {
-
-			public UsermainUI() {
+		class UsermainUI extends JFrame  implements ActionListener{
+			private DefaultListModel<String> listModel;
+		    private JList<String> list;
+			 UsermainUI() {
 		        setTitle("User main UI");
 		        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		        setSize(700, 500);
@@ -454,16 +470,25 @@ public class ui {
 		        // 상단 패널 (예매일, 예매 내역 확인 버튼)
 		        JPanel topPanel = new JPanel(new BorderLayout());
 		        JPanel topdatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		        JLabel dateLabel = new JLabel("예매일: ");
-		        JTextField dateTextField = new JTextField(10); // 예매 날짜를 입력받는 필드
-		        topdatePanel.add(dateLabel);
-		        topdatePanel.add(dateTextField); // 예매일 패널
 
 		        JButton confirmBookingButton = new JButton("예매 내역 확인");
 		        topPanel.add(topdatePanel, BorderLayout.WEST);
 		        topPanel.add(confirmBookingButton, BorderLayout.EAST);
 		        mainPanel.add(topPanel, BorderLayout.NORTH);
-
+		        
+		        confirmBookingButton.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		            	List<String> result = db1.checkMyPayment();
+		            	if(result.size()==0) {
+		            		JOptionPane.showMessageDialog(null, "예매 내역이 없습니다.", "error", JOptionPane.ERROR_MESSAGE);
+		            	}
+		            	else {
+		            	 ReservationUI reservationUI = new ReservationUI();
+		                 reservationUI.setVisible(true);
+		            	}
+		            }
+		        });
 		        // 왼쪽 패널 (검색 영역)
 		        JPanel leftPanel = new JPanel(new BorderLayout());
 		        JPanel searchPanel = new JPanel();
@@ -520,46 +545,93 @@ public class ui {
 		        mainPanel.add(leftPanel, BorderLayout.WEST);
 
 		        // 오른쪽 패널 (데이터 테이블)
+		        listModel = new DefaultListModel<>();
+		        
+		        // JList 생성 및 데이터 모델 설정
+		        list = new JList<>(listModel);
+		        JScrollPane scrollPane = new JScrollPane(list);
 		        JPanel rightPanel = new JPanel(new BorderLayout());
-		        String[] columnNames = {"영화명", "감독명", "배우", "장르"};
-		        Object[][] data = {
-		                {"영화1", "감독1", "배우1", "장르1"},
-		                {"영화2", "감독2", "배우2", "장르2"},
-		                // 데이터는 예시
-		        };
-		        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-		        JTable table = new JTable(model);
-		        table.setPreferredScrollableViewportSize(new Dimension(400, 400)); // 테이블 크기 조정
-		        table.setFillsViewportHeight(true); // 테이블이 전체 높이를 채우도록 설정
-		        JScrollPane scrollPane = new JScrollPane(table);
-		        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10)); // 여백 추가
+		        rightPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 		        rightPanel.add(scrollPane, BorderLayout.CENTER);
 		        mainPanel.add(rightPanel, BorderLayout.CENTER);
 
-		        add(mainPanel);
-
-		        // 테이블 클릭 이벤트 처리
-		        table.addMouseListener(new MouseAdapter() {
+		        getContentPane().add(mainPanel);
+		        setVisible(true);
+		        List<String> initialData = new ArrayList<>();
+		        initialData.addAll(db1.printMovie("", "","",""));
+		        
+		        //선택 조회 
+		        searchButton.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		                String movie = movieField.getText();
+		                String director = directorField.getText();
+		                String actor = actorField.getText();
+		                String genre = genreField.getText();
+		                List<String> result = db1.printMovie(movie, director, actor, genre);
+		                updateList(result);
+		            }
+		        });
+		        searchAllButton.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		                List<String> result = db1.printMovie("", "", "", "");
+		                updateList(result);
+		            }
+		        });
+		        list.addMouseListener(new MouseAdapter() {
+		            @Override
 		            public void mouseClicked(MouseEvent e) {
-		                int row = table.getSelectedRow();
-		                if (row != -1) {
-		                    String movieName = (String) table.getValueAt(row, 0);
-		                    String directorName = (String) table.getValueAt(row, 1);
-		                    String actorName = (String) table.getValueAt(row, 2);
-		                    String genre = (String) table.getValueAt(row, 3);
-		                    openSeatBookingUI(movieName, directorName, actorName, genre);
+		                if (e.getClickCount() == 2) { // 클릭을 2번 했을 때
+		                    int index = list.locationToIndex(e.getPoint());                	
+
+		                    if (index >= 0) {
+		                        String selectedItem = listModel.getElementAt(index);
+
+		                        String[] parts = selectedItem.split("\\|"); //|로 구분되었으므로 
+		                        int result = db1.scheduleIdFromMovieId(Integer.parseInt(parts[1].trim()));
+		                        if (result < 0) {
+		                        	JOptionPane.showMessageDialog(null, "해당 영화의 상영 일정이 없습니다.", "error", JOptionPane.ERROR_MESSAGE);
+		                        	return;
+		                        }
+		                        String movieName = parts[2].trim();
+		                        String directorName = parts[4].trim();
+		                        String actorName = parts[5].trim();
+		                        String genre = parts[6].trim();
+		                        openSeatBookingUI(movieName, directorName, actorName, genre, result);
+		                        
+		                    }
 		                }
 		            }
 		        });
-
-		        
 		        setVisible(true);
 		    }
-		    private void openSeatBookingUI(String movieName, String directorName, String actorName, String genre) {
-		        // 좌석 예매 UI를 새로운 창으로 띄웁니다.
-		    	List<String> reservedSeats = Arrays.asList("1-1", "2-3", "5-7");
-		        new SeatBookingUI(movieName, directorName, actorName, genre,reservedSeats ).setVisible(true);
+			private void updateList(List<String> data) {
+		        SwingUtilities.invokeLater(new Runnable() {
+		            @Override
+		            public void run() {
+		                listModel.clear();
+		                for (String item : data) {
+		                    if (!listModel.contains(item)) {
+		                        listModel.addElement(item);
+		                    }
+		                }
+		            }
+		        });
 		    }
+			
+		    public void openSeatBookingUI(String movieName, String directorName, String actorName, String genre, int scheduleIdInput) {
+		        // 좌석 예매 UI를 새로운 창으로 띄웁니다.
+		    	List<String> replySeat = db1.seatBySchedule(scheduleIdInput);
+		    	String reserved = replySeat.removeLast();
+		    	List<String> reservedSeats = Arrays.asList(reserved.split(" "));//&여기 연결 
+		        new SeatBookingUI(movieName, directorName, actorName, genre,reservedSeats ,scheduleIdInput).setVisible(true);
+		    }
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
 		}
 
 		class SeatButton extends JButton {
@@ -619,19 +691,20 @@ public class ui {
 		    }
 		}
 
-		 class SeatBookingUI extends JFrame {
+		class SeatBookingUI extends JFrame {
 		    private JLabel selectedSeatLabel;
-		    private final int rows = 10;
-		    private final int cols = 10;
+		    private int rows = 10;
+		    private int cols = 10;
+		    private int scheduleIdT = 0;
 		    private List<SeatButton> selectedSeats = new ArrayList<>();
 
-		    public SeatBookingUI(String movieName, String directorName, String actorName, String genre, List<String> reservedSeats) {
+		    public SeatBookingUI(String movieName, String directorName, String actorName, String genre, List<String> reservedSeats, int inputScheduleID) {
 		        setTitle("Seat Select Page - " + movieName);
 		        setSize(700, 500);
 		        setLocationRelativeTo(null);
 		        setLayout(new BorderLayout());
 		        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		        scheduleIdT = inputScheduleID;
 		        JPanel seatPanel = new JPanel(new GridLayout(rows, cols));
 		        ActionListener seatButtonListener = new ActionListener() {
 		            @Override
@@ -641,8 +714,13 @@ public class ui {
 		                updateSelectedSeats();
 		            }
 		        };
-		        for (int i = 0; i < rows; i++) {
-		            for (int j = 0; j < cols; j++) {
+		        
+		        List<String> replySeat = db1.seatBySchedule(inputScheduleID);
+		    	String numOfSeats = replySeat.removeFirst();
+		    	cols = Integer.parseInt(numOfSeats.strip().split(",")[0]);
+		    	rows = Integer.parseInt(numOfSeats.strip().split(",")[1]);
+		        for (int i = 0; i < cols; i++) {
+		            for (int j = 0; j < rows; j++) {
 		                String seatNumber = (i + 1) + "-" + (j + 1);
 		                SeatButton seat = new SeatButton(seatNumber, seatButtonListener);
 		                if (reservedSeats.contains(seatNumber)) {
@@ -661,15 +739,24 @@ public class ui {
 		        selectedSeatLabel.setBorder(new EmptyBorder(0, 20, 0, 0));
 		        JButton bookButton = new JButton("예매하기");
 		        bookButton.setPreferredSize(new Dimension(150, 50));
+		        JButton checkButton = new JButton("확인");
+		        checkButton.setPreferredSize(new Dimension(150, 50));
 		        bookButton.addActionListener(new ActionListener() {
 		            @Override
 		            public void actionPerformed(ActionEvent e) {
 		                bookSeats();
 		            }
 		        });
+		        checkButton.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		                dispose();
+		            }
+		        });
 
 		        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		        buttonPanel.add(bookButton);
+		        buttonPanel.add(checkButton);
 
 		        bottomPanel.add(selectedSeatLabel, BorderLayout.CENTER);
 		        bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -705,9 +792,48 @@ public class ui {
 		        if (selectedSeats.isEmpty()) {
 		            JOptionPane.showMessageDialog(this, "선택된 좌석이 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
 		        } else {
+		        	int n=0;
+		        	List<Integer> xL = new ArrayList<>();
+		        	List<Integer> yL = new ArrayList<>();
+		        	List<Integer> cL = new ArrayList<>();
 		            for (SeatButton seatButton : selectedSeats) {
 		                seatButton.reserve();
+		                try {
+		                	String [] loc = seatButton.seatNumber.split("-");
+		                	int x = Integer.parseInt(loc[0].strip());
+		                	int y = Integer.parseInt(loc[1].strip());
+		                	n += 1;
+		                	xL.add(x);
+		                	yL.add(y);
+		                	cL.add(10000);
+		                }
+		                catch (Exception e) {
+		                	System.out.println("convert error");
+		                }
 		            }
+		            Integer[] x1 = xL.toArray(new Integer[0]);
+
+		            int[] X = new int[x1.length];
+		            for (int i = 0; i < x1.length; i++) {
+		                X[i] = x1[i];
+		            }
+		            
+		            Integer[] y1 = yL.toArray(new Integer[0]);
+
+		            int[] Y = new int[y1.length];
+		            for (int i = 0; i < y1.length; i++) {
+		                Y[i] = y1[i];
+		            }
+		            
+		            Integer[] c1 = cL.toArray(new Integer[0]);
+
+		            int[] C = new int[c1.length];
+		            for (int i = 0; i < c1.length; i++) {
+		                C[i] = c1[i];
+		            }
+		            
+		            
+		            int bookResult = db1.bookTicket(n, X, Y, C, scheduleIdT, "Internet");
 		            selectedSeats.clear();
 		            updateSelectedSeats();
 		            JOptionPane.showMessageDialog(this, "좌석이 예매되었습니다.", "성공", JOptionPane.INFORMATION_MESSAGE);
@@ -716,8 +842,10 @@ public class ui {
 		}
 
 		class ReservationUI extends JFrame {
-		    private JTable table;
-		    private DefaultTableModel model;
+		     // 리스트 모델 설정
+			 DefaultListModel<String> listModel = new DefaultListModel<>();
+		     // 리스트 생성 및 모델 할당
+		     JList<String> list = new JList<>(listModel);
 
 		    public ReservationUI() {
 		        // 프레임 설정
@@ -726,19 +854,9 @@ public class ui {
 		        setLocationRelativeTo(null);
 		        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		        // 테이블 모델 설정
-		        model = new DefaultTableModel();
-		        model.addColumn("영화명");
-		        model.addColumn("상영일");
-		        model.addColumn("상영관번호");
-		        model.addColumn("좌석번호");
-		        model.addColumn("판매 가격");
 
-		        // 테이블 생성 및 모델 할당
-		        table = new JTable(model);
-
-		        // 스크롤 패널에 테이블 추가
-		        JScrollPane scrollPane = new JScrollPane(table);
+		        // 스크롤 패널에 리스트 추가
+		        JScrollPane scrollPane = new JScrollPane(list);
 
 		        // 패널 생성 및 테두리 설정
 		        JPanel panel = new JPanel(new BorderLayout());
@@ -748,36 +866,150 @@ public class ui {
 		        // 프레임에 패널 추가
 		        add(panel, BorderLayout.CENTER);
 		        setVisible(true);
-		        table.addMouseListener(new MouseAdapter() {
+		        List<String> result = db1.checkMyPayment();
+            	listModel.clear();
+            	for (String item : result) {
+                    if (!listModel.contains(item)) {
+                        listModel.addElement(item);
+                    }
+                }
+            	//ListModel 변화 리스너
+            	listModel.addListDataListener((ListDataListener) new ListDataListener() {
+            		
+            		@Override
+                    public void intervalAdded(ListDataEvent e) {
+                        System.out.println("Element(s) added: " + e.getIndex0() + " to " + e.getIndex1());
+                        if(listModel.size()==0) {
+                        	dispose();
+                        }
+                    }
+
+                    @Override
+                    public void intervalRemoved(ListDataEvent e) {
+                        System.out.println("Element(s) removed: " + e.getIndex0() + " to " + e.getIndex1());
+                        if(listModel.size()==0) {
+                        	dispose();
+                        }
+                    }
+
+                    @Override
+                    public void contentsChanged(ListDataEvent e) {
+                        System.out.println("Contents changed: " + e.getIndex0() + " to " + e.getIndex1());
+                        if(listModel.size()==0) {
+                        	dispose();
+                        }
+                    }
+                });
+            	
+		        // 예매 항목 클릭 리스너
+		        list.addMouseListener(new MouseAdapter() {
 		            public void mouseClicked(MouseEvent e) {
 		                if (e.getClickCount() == 1) {
-		                    int selectedRow = table.getSelectedRow();
-		                    if (selectedRow != -1) {
-		                        //String movieName = (String) tableModel.getValueAt(selectedRow, 0);
-		                        //showDetailedInfo(movieName);
+		                    int selectedIndex = list.getSelectedIndex();
+		                    if (selectedIndex != -1) {
+		                        // 예매 내역에서 선택된 항목의 정보를 가져오는 코드 
+		                        String selectedItem = listModel.getElementAt(selectedIndex);
+		                        //|로 구분, 임시 +++
+		                        String[] parts = selectedItem.split("\\|");
+		                        
+		                        try{
+		                        	int payIdSelected = Integer.parseInt(parts[1].strip());
+		                        	DetailedreservationUI detailedReservationUI = new DetailedreservationUI(payIdSelected, listModel);
+		                        	detailedReservationUI.setVisible(true);
+			                    }
+			                    catch (NumberFormatException ex){
+			                    	JOptionPane.showMessageDialog(null, "데이터에 잘못된 값이 있습니다.", "error", JOptionPane.ERROR_MESSAGE);
+			                        return;
+			                    }
+		                        
 		                    }
 		                }
 		            }
 		        });
 		    }
 
+		    // 예매 내역을 리스트에 추가하는 메서드 +++ 이거 현지가 구현해줌 
+		    public void addReservation(String movieName, String screeningDate, String theaterNumber, String seatNumber, String price) {
+		        String reservationInfo = movieName + " - " + screeningDate + " - " + theaterNumber + " - " + seatNumber + " - " + price;
+		        listModel.addElement(reservationInfo);
+		    }
+
+		    // 예매 내역의 상세 정보를 표시하는 메서드 (실제 구현은 생략되었습니다)
+		    private void showDetailedInfo(String movieName, String screeningDate, String theaterNumber, String seatNumber, String price) {
+		        // 여기에 상세 정보를 표시하는 로직을 구현할 수 있습니다.
+		        JOptionPane.showMessageDialog(this,
+		                "영화명: " + movieName + "\n상영일: " + screeningDate + "\n상영관번호: " + theaterNumber
+		                        + "\n좌석번호: " + seatNumber + "\n판매 가격: " + price,
+		                "예매 상세 정보", JOptionPane.INFORMATION_MESSAGE);
+		    }
+
 		}
+		
 		class DetailedreservationUI extends JFrame {
-			 private DefaultTableModel tableModel;
-			    private JTable table;
-			    private JTextField searchField;
-			    private Vector<Object[]> detailedData; // 예매 정보를 저장하는 벡터
+		    public DetailedreservationUI(int inputPayId, DefaultListModel<String> inputList) {
 
-			    public DetailedreservationUI() {
-			        setTitle("예매 시스템");
-			        setSize(800, 500);
-			        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			        setLocationRelativeTo(null);
-			        setLayout(new BorderLayout());
+			     // 리스트 모델 설정
+				 DefaultListModel<String> listModel = new DefaultListModel<>();
+			     // 리스트 생성 및 모델 할당
+			     JList<String> list = new JList<>(listModel);
+		        setTitle("예매 시스템");
+		        setSize(800, 500);
+		        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		        setLocationRelativeTo(null);
+		        setLayout(new BorderLayout());
+		        
+		        JScrollPane scrollPane = new JScrollPane(list);
 
-			        detailedData = new Vector<>();
-			        initializeUI();
-			    }
+		        // 패널 생성 및 테두리 설정
+		        JPanel panel = new JPanel(new BorderLayout());
+		        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		        panel.add(scrollPane, BorderLayout.CENTER);
+
+		        // 프레임에 패널 추가
+		        add(panel, BorderLayout.CENTER);
+		        List<String> result = db1.showDetailPayment(inputPayId);
+            	listModel.clear();
+            	for (String item : result) {
+                    if (!listModel.contains(item)) {
+                        listModel.addElement(item);
+                    }
+                }
+            	JPanel panel2 = new JPanel(new GridLayout(3, 1, 10, 10));
+            	add(panel2, BorderLayout.EAST);
+            	JButton delete = new JButton("delete");
+            	JButton movieEdit = new JButton("movieEdit");
+            	JButton scheduleEdit = new JButton("scheduleEdit");
+            	panel2.add(delete);
+            	panel2.add(movieEdit);
+            	panel2.add(scheduleEdit);
+            	
+		        setVisible(true);
+		        addWindowListener(new WindowAdapter() {
+		            @Override
+		            public void windowClosed(WindowEvent e) {
+		            	inputList.clear();
+		            	List<String> resultT = db1.checkMyPayment();
+		            	inputList.clear();
+		            	for (String item : resultT) {
+		                    if (!inputList.contains(item)) {
+		                    	inputList.addElement(item);
+		                    }
+		                }
+		            }
+		        });
+		        delete.addActionListener(new ActionListener() {
+		            @Override
+		            public void actionPerformed(ActionEvent e) {
+		                int result = db1.cancelPay(inputPayId);
+		                if (result<0) {
+		                	JOptionPane.showMessageDialog(null, "데이터에 잘못된 값이 있습니다.", "error", JOptionPane.ERROR_MESSAGE);
+		                }
+		                dispose();
+		            }
+		        });
+		        //detailedData = new Vector<>();
+		        //initializeUI();
+		    }
 
 			    private void initializeUI() {
 			        // 왼쪽 패널 (테이블)
@@ -903,8 +1135,9 @@ public class ui {
 		 * AdminUI(); } });
 		 */
 		ui uiInstance = new ui();
-		AdminUI aInstance = uiInstance.new AdminUI();
-		//new LoginUI();
+		//AdminUI aInstance = uiInstance.new AdminUI();
+		LoginUI aInstance = uiInstance.new LoginUI();
+		//DetailedreservationUI aInstance = uiInstance.new DetailedreservationUI();
 		//new UsermainUI();
 		//new ReservationUI();
 		//new DetailedreservationUI();

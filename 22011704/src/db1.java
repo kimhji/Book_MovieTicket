@@ -93,7 +93,7 @@ public class db1 {
 			stmt = conn.createStatement();
 			
 			
-			String insertMovieData = "INSERT INTO movie (movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate) VALUES "
+			String insertMovieData = "INSERT INTO movie (movieId, movieName, movieGrade, director, actor, genre, movieSummary, openDate, rate) VALUES "
                     + "(1, 'The Silent Echo', 0, 'John Smith,Emily Johnson', 'Michael Brown,Jessica Taylor,David Anderson', 'Drama', 'A young musician discovers an old, silent piano in an abandoned house and uncovers its mysterious past, leading to a journey of self-discovery and reconciliation.', '2023-01-01', 5),"
                     + "(2, 'Shadows of the Past', 2, 'Robert Davis,Laura Miller', 'Daniel Wilson,Sarah Moore,James Jackson', 'Thriller', 'A detective must unravel the secrets of a small town\\'s dark history to solve a series of gruesome murders linked to long-forgotten crimes.', '2023-02-25', 4),"
                     + "(3, 'The Last Horizon', 1, 'William White,Olivia Harris', 'Joshua Martin,Emily Thompson,Christopher Garcia', 'Science Fiction', 'In a future where Earth is dying, a team of astronauts embarks on a mission to find a new habitable planet, but they face unexpected challenges and discover a shocking truth.','2023-03-05', 4),"
@@ -270,7 +270,7 @@ public class db1 {
                 while (resultSet.next()) {
                     int movieId = resultSet.getInt("movieId");
                     String movieName = resultSet.getString("movieName");
-                    int moveGrade = resultSet.getInt("moveGrade");
+                    int movieGrade = resultSet.getInt("movieGrade");
                     String director = resultSet.getString("director");
                     String actor = resultSet.getString("actor");
                     String genre = resultSet.getString("genre");
@@ -278,7 +278,7 @@ public class db1 {
                     String openDate = resultSet.getDate("openDate").toString();
                     int rate = resultSet.getInt("rate");
 
-                    String row = String.format(format, movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate);
+                    String row = String.format(format, movieId, movieName, movieGrade, director, actor, genre, movieSummary, openDate, rate);
                     returnResult.add(row);
                     System.out.println(row);
                     
@@ -499,7 +499,7 @@ public class db1 {
 			String colNames = "";
 			switch(tableName) {
 			case "movie":
-				colNames = " (movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate) VALUES ";
+				colNames = " (movieName, movieGrade, director, actor, genre, movieSummary, openDate, rate) VALUES ";
 				break;
 			case "room":
 				colNames = " (seatCol, seatRow, isUsed) VALUES ";
@@ -610,7 +610,7 @@ public class db1 {
                 while (resultSet.next()) {
                     int movieId = resultSet.getInt("movieId");
                     String movieName = resultSet.getString("movieName");
-                    int moveGrade = resultSet.getInt("moveGrade");
+                    int movieGrade = resultSet.getInt("movieGrade");
                     String director = resultSet.getString("director");
                     String actor = resultSet.getString("actor");
                     String genre = resultSet.getString("genre");
@@ -618,7 +618,7 @@ public class db1 {
                     String openDate = resultSet.getDate("openDate").toString();
                     int rate = resultSet.getInt("rate");
 
-                    String row = String.format(format, movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate);
+                    String row = String.format(format, movieId, movieName, movieGrade, director, actor, genre, movieSummary, openDate, rate);
                     returnResult.add(row);
                     System.out.println(row);
                     
@@ -668,7 +668,7 @@ public class db1 {
                 while (resultSet.next()) {
                     int seatC = resultSet.getInt("colX");
                     int seatR = resultSet.getInt("rowY");
-                    line += seatC + "," + seatR +" ";
+                    line += seatC + "-" + seatR +" ";
                 }
                 returnResult.add(line);
                 System.out.println(line);
@@ -681,7 +681,7 @@ public class db1 {
         return returnResult;
 	}
 	
-	public static int bookTicket(int n, int[] colx, int[] rowy, int[] ticketPrice, int scheduleid, String paymethod) {
+	public static int bookTicket(int n, int [] xL, int [] yL, int [] cL, int scheduleid, String paymethod) {
         String query = "";
         int tRoomId = -1;
 	    try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")){
@@ -693,9 +693,9 @@ public class db1 {
                 }
                 int totalPrice = 0;
                 for(int i=0; i<n;i++) {
-                	totalPrice += ticketPrice[i];
+                	totalPrice += cL[i];
 	                query = "INSERT INTO seat (roomId, isUsed, colX, rowY, showScheduleId) VALUE ("+tRoomId 
-	                		+","+1+","+colx[i]+","+rowy[i]+","+scheduleid+");";
+	                		+","+1+","+xL[i]+","+yL[i]+","+scheduleid+");";
 	                statement.executeUpdate(query);
                 }
                 
@@ -704,7 +704,7 @@ public class db1 {
                 
                 for(int i=0; i<n;i++) {
 	                query = "INSERT INTO ticket (showScheduleId, roomId, seatId, PayID, isPrinted, averageSale, price) VALUE ("+scheduleid
-	                		+","+tRoomId+", (select seatId from seat where showScheduleId = "+scheduleid+" and colX = " +colx[i]+" and rowY = "+rowy[i]+" ),(select max(payInfo.payId) from payInfo), 0,"+ticketPrice[i]+","+ticketPrice[i]+");";
+	                		+","+tRoomId+", (select seatId from seat where showScheduleId = "+scheduleid+" and colX = " +xL[i]+" and rowY = "+yL[i]+" ),(select max(payInfo.payId) from payInfo), 0,"+cL[i]+","+cL[i]+");";
 	                statement.executeUpdate(query);
                 }
 	        }
@@ -808,44 +808,71 @@ public class db1 {
                 int idx = 1;
                 while (resultSet.next()) {
                 	String row = "#ticket"+idx+"\n";
+                	returnResult.add(row);
                     int x = resultSet.getInt("colX");
                 	int y = resultSet.getInt("rowY");
-                	row += "seat location : "+x+"-"+y+"\n";
+                	row = "("+idx+")"+"seat location : "+x+"-"+y+"\n";
+                	returnResult.add(row);
 
                 	int round = resultSet.getInt("showSchedule.showRound");
                 	String NameOfMovie = resultSet.getString("movie.movieName");
-                	row += NameOfMovie+" #"+round+"\n";
+                	row = "("+idx+")"+NameOfMovie+" #"+round+"\n";
+                	returnResult.add(row);
                 	
                 	int roomId = resultSet.getInt("ticket.roomId");
-                	row += "Screen Number : "+ roomId+"\n";
+                	row = "("+idx+")"+"Screen Number : "+ roomId+"\n";
+                	returnResult.add(row);
                 	int price = resultSet.getInt("ticket.price");
-                	row += "ticket price : " + price+"\n";
+                	row = "("+idx+")"+"ticket price : " + price+"\n";
+                	returnResult.add(row);
                 	int printed = resultSet.getInt("ticket.isPrinted");
                 	if (printed > 0) {
-                    	row += "the ticket printed : YES\n";
-           
+                    	row = "("+idx+")"+"the ticket printed : YES\n";
+                    	returnResult.add(row);
                 	}
                 	else {
-                		row += "the ticket printed : NO\n";
+                		row = "("+idx+")"+"the ticket printed : NO\n";
+                		returnResult.add(row);
                 	}
                 	
                 	String startDate = resultSet.getString("showSchedule.showingStartDay");
                 	String startTime = resultSet.getString("showSchedule.startTime");
                 	
-                	row += "Screen start : "+ startDate+" "+startTime+"\n\n";
+                	row = "("+idx+")"+"Screen start : "+ startDate+" "+startTime+"\n\n";
                 	
                 	returnResult.add(row);
-
-	                System.out.print(row);
+	                //System.out.print(row);
                 	idx += 1;
                 }
             }
         }
         catch (Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
         return returnResult;
+	}
+	
+	public static int scheduleIdFromMovieId(int m_id){
+		int result = -1;
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM showSchedule WHERE showSchedule.movieId = "+m_id+";";
+                ResultSet resultSet = statement.executeQuery(query);
+                
+         
+                if (resultSet.next()) {
+                	result = resultSet.getInt("showScheduleId");
+                }
+            }
+            
+    	}
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return result;
 	}
 	
 	public static void main (String[] args) {
@@ -856,7 +883,7 @@ public class db1 {
 		//printAllTable();
 		//printMovie("","John","","");
 		//seatBySchedule(4);
-		/*int [] x = {3,4};
+		int [] x = {3,4};
 		int [] y = {5,6};
 		int [] pay = {12345,34252};
 		bookTicket(2, x, y, pay, 4,"Cash");
@@ -864,12 +891,12 @@ public class db1 {
 		int [] x1 = {7,6};
 		int [] y1 = {5,5};
 		int [] pay1 = {214,2342};
-		bookTicket(2, x1, y1, pay1, 3,"Card");*/
+		bookTicket(2, x1, y1, pay1, 3,"Card");
 		/*printAllTable();
 		cancelPay(16);
 		printAllTable();*/
 		//checkMyPayment();
-		//showDetailPayment(16);
-		
+		showDetailPayment(16);
+		scheduleIdFromMovieId(8);
 	}
 }
