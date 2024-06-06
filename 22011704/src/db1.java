@@ -744,42 +744,109 @@ public class db1 {
 		return 0;
 	}
 	
-	/*public static List<String> checkMyPayment(){
+	public static List<String> checkMyPayment(){
 		List<String> returnResult = new ArrayList<>();
 		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
             try (Statement statement = connection.createStatement()) {
                 
-                String query = "SELECT * FROM payInfo WHERE payInfo.userId = user1;";
+                String query = "SELECT * FROM payInfo WHERE payInfo.userId = \'user1\';";
                 ResultSet resultSet = statement.executeQuery(query);
                 
                 String format = "| %-8s | %-20s | %-8s | %-8s | %-20s | %-10s |%n";
                 
-                System.out.format(format, "PayID", "PayMethod", "PayState", "Price", "UserID", "PayDate");
-                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-
-                String header = String.format(format, "PayID", "PayMethod", "PayState", "Price", "UserID", "PayDate");
-                returnResult.add(header);
-                returnResult.add("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-                
+                List<Integer> payIdList = new ArrayList<>();
                 while (resultSet.next()) {
-                    int seatC = resultSet.getInt("colX");
-                    int seatR = resultSet.getInt("rowY");
-                    String row = String.format(format, movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate);
+
+                    int payId = resultSet.getInt("payId");
+                    payIdList.add(payId);
+                    String payMethod = resultSet.getString("payMethod");
+                    int payState = resultSet.getInt("payState");
+                    int price = resultSet.getInt("price");
+                    String userId = resultSet.getString("userId");
+                    String payDate = resultSet.getString("payDate");
+
+                    String row = String.format(format, payId, payMethod, payState, price, userId, payDate);
+                    row += "\t";
                     returnResult.add(row);
-                    System.out.println(row);
                 }
-                returnResult.add(line);
-                System.out.println(line);
+                int idx = 0;
+                String row = "";
+                while(payIdList.size() != 0) {
+                	int tPayId = payIdList.remove(0);
+                	row = returnResult.remove(0);
+	                String query2 = "SELECT * FROM payInfo, ticket, movie, showSchedule WHERE payInfo.payId = ticket.payId and ticket.showScheduleId = showSchedule.showScheduleId and showSchedule.movieId = movie.movieId and payInfo.payId = "+tPayId+";";
+	                ResultSet resultSet2 = statement.executeQuery(query2);
+	                while (resultSet2.next()) {
+	                	String m_Name = resultSet2.getString("movie.movieName");
+	                	String startDate = resultSet2.getString("movie.openDate");
+	                    int r_Id = resultSet2.getInt("ticket.roomId");
+	                	int s_Id = resultSet2.getInt("ticket.seatId");
+	                	row += m_Name +"\t" + startDate +"\t"+r_Id +"\t"+s_Id+"\n\t";
+	                }
+	                row += "\n";
+	                returnResult.add(row);
+	                System.out.print(row);
+                }
+                
+                
             }
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
         return returnResult;
 	}
-	*/
 	
+	public static List<String> showDetailPayment(int PayId){
+		List<String> returnResult = new ArrayList<>();
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM movie,ticket, showSchedule, seat WHERE ticket.payId = "+PayId+" and ticket.showScheduleId = showSchedule.showScheduleId and ticket.seatId = seat.seatId and showSchedule.movieId = movie.movieId;";
+                ResultSet resultSet = statement.executeQuery(query);
+                int idx = 1;
+                while (resultSet.next()) {
+                	String row = "#ticket"+idx+"\n";
+                    int x = resultSet.getInt("colX");
+                	int y = resultSet.getInt("rowY");
+                	row += "seat location : "+x+"-"+y+"\n";
+
+                	int round = resultSet.getInt("showSchedule.showRound");
+                	String NameOfMovie = resultSet.getString("movie.movieName");
+                	row += NameOfMovie+" #"+round+"\n";
+                	
+                	int roomId = resultSet.getInt("ticket.roomId");
+                	row += "Screen Number : "+ roomId+"\n";
+                	int price = resultSet.getInt("ticket.price");
+                	row += "ticket price : " + price+"\n";
+                	int printed = resultSet.getInt("ticket.isPrinted");
+                	if (printed > 0) {
+                    	row += "the ticket printed : YES\n";
+           
+                	}
+                	else {
+                		row += "the ticket printed : NO\n";
+                	}
+                	
+                	String startDate = resultSet.getString("showSchedule.showingStartDay");
+                	String startTime = resultSet.getString("showSchedule.startTime");
+                	
+                	row += "Screen start : "+ startDate+" "+startTime+"\n\n";
+                	
+                	returnResult.add(row);
+
+	                System.out.print(row);
+                	idx += 1;
+                }
+            }
+        }
+        catch (Exception e) {
+            //e.printStackTrace();
+            return null;
+        }
+        return returnResult;
+	}
 	
 	public static void main (String[] args) {
 		
@@ -793,10 +860,16 @@ public class db1 {
 		int [] y = {5,6};
 		int [] pay = {12345,34252};
 		bookTicket(2, x, y, pay, 4,"Cash");
-		printAllTable();
+
+		int [] x1 = {7,6};
+		int [] y1 = {5,5};
+		int [] pay1 = {214,2342};
+		bookTicket(2, x1, y1, pay1, 3,"Card");*/
+		/*printAllTable();
 		cancelPay(16);
 		printAllTable();*/
-		
+		//checkMyPayment();
+		//showDetailPayment(16);
 		
 	}
 }
