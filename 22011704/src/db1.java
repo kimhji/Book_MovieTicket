@@ -1,3 +1,17 @@
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,7 +22,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 public class db1 {
 	// 관리자 권한
@@ -459,6 +489,54 @@ public class db1 {
 	    }
 		return 0;
 	}
+	public static int addData(String tableName, String addvalue) {
+		Statement stmt = null;
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 드라이버 로드
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "root","1234"); // JDBC 연결
+			System.out.println("DB 연결 완료");
+			stmt = conn.createStatement();
+			String colNames = "";
+			switch(tableName) {
+			case "movie":
+				colNames = " (movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate) VALUES ";
+				break;
+			case "room":
+				colNames = " (seatCol, seatRow, isUsed) VALUES ";
+				break;
+			case "showSchedule":
+				colNames = " (movieId, roomId, showingStartDay, dayType, showRound, startTime) VALUES ";
+				break;
+			case "userInfo":
+				colNames = " (userId, name, phoneNumber, addressEmail) VALUES ";
+				break;
+			case "payInfo":
+				colNames = " (payMethod, payState, price, userId, payDate) VALUES ";
+				break;
+			case "seat":
+				colNames = " (roomId, isUsed, colX, rowY, showScheduleId) VALUES ";
+				break;
+			case "ticket":
+				colNames = " (showScheduleId, roomId, seatId, payId, isPrinted, averageSale, price) VALUES ";
+				break;
+			default:
+				return -1;
+			}
+			
+			String insertMovieData = "INSERT INTO "+tableName+colNames+addvalue+";";
+			stmt.executeUpdate(insertMovieData);
+			System.out.println(tableName + " 데이터 추가 완료");
+			return 0;
+		} catch (ClassNotFoundException e) {
+			System.out.println("JDBC 드라이버 로드 오류");
+			return -1;
+		} catch (SQLException e) {
+			System.out.println("DB 연결 오류");
+			System.out.println(e.getMessage());
+			return -1;
+		}
+	}
+	
 	// 사용자 권한
 	public static List<String> printMovie(String MovieName, String Director, String Actor, String Genre){
 		//Director나 Actor는 한 명의 이름씩만 넣기
@@ -476,11 +554,11 @@ public class db1 {
             query = "SELECT * FROM movie"; // 테이블 이름을 원하는 대로 변경하세요
             String Condi = " WHERE ";
             boolean isExistCondition = false;
-            if(MovieName != "") {
-            	Condi += "movie.movieName = \'"+MovieName+"\'";
+            if(MovieName.length() > 0) {
+            	Condi += "movie.movieName = \'"+MovieName.strip()+"\'";
             	isExistCondition = true;
             }
-            if(Director != "") {
+            if(Director.length() > 0) {
             	if(isExistCondition) {
             		Condi += " AND ";
             	}
@@ -488,10 +566,10 @@ public class db1 {
             		isExistCondition = true;
             	}
             	
-            	Condi += "movie.director LIKE \'%"+Director+"%\'";
+            	Condi += "movie.director LIKE \'%"+Director.strip()+"%\'";
             	isExistCondition = true;
             }
-            if(Actor != "") {
+            if(Actor.length() > 0) {
             	if(isExistCondition) {
             		Condi += " AND ";
             	}
@@ -499,10 +577,10 @@ public class db1 {
             		isExistCondition = true;
             	}
             	
-            	Condi += "movie.actor LIKE \'%"+Actor+"%\'";
+            	Condi += "movie.actor LIKE \'%"+Actor.strip()+"%\'";
             	isExistCondition = true;
             }
-            if(Genre != "") {
+            if(Genre.length() > 0) {
             	if(isExistCondition) {
             		Condi += " AND ";
             	}
@@ -510,7 +588,7 @@ public class db1 {
             		isExistCondition = true;
             	}
             	
-            	Condi += "movie.genre = \'"+Genre+"\'";
+            	Condi += "movie.genre = \'"+Genre.strip()+"\'";
             	isExistCondition = true;
             }
             if(isExistCondition) {
@@ -701,13 +779,15 @@ public class db1 {
         return returnResult;
 	}
 	*/
+	
+	
 	public static void main (String[] args) {
 		
 		init();
 		//delete("movie", "movie.movieId=3");
 		//update("movie", "movie.movieName = \'test1\'", "movie.movieId = 3");
 		//printAllTable();
-		//printMovie("Midnight Sun","","Nicholas Ward","");
+		//printMovie("","John","","");
 		//seatBySchedule(4);
 		/*int [] x = {3,4};
 		int [] y = {5,6};
