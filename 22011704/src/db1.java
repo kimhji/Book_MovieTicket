@@ -460,22 +460,263 @@ public class db1 {
 		return 0;
 	}
 	// 사용자 권한
+	public static List<String> printMovie(String MovieName, String Director, String Actor, String Genre){
+		//Director나 Actor는 한 명의 이름씩만 넣기
+		List<String> returnResult = new ArrayList<>();
+		String jdbcUrl = "jdbc:mysql://localhost:3306/db1"; // 데이터베이스 URL
+        String jdbcUser = "user1"; // MySQL 사용자 이름
+        String jdbcPassword = "user1"; // MySQL 사용자 비밀번호
+        String query;
+        String format;
+        String header;
+        
+        // 데이터베이스 연결
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
+            // SELECT 쿼리 실행
+            query = "SELECT * FROM movie"; // 테이블 이름을 원하는 대로 변경하세요
+            String Condi = " WHERE ";
+            boolean isExistCondition = false;
+            if(MovieName != "") {
+            	Condi += "movie.movieName = \'"+MovieName+"\'";
+            	isExistCondition = true;
+            }
+            if(Director != "") {
+            	if(isExistCondition) {
+            		Condi += " AND ";
+            	}
+            	else {
+            		isExistCondition = true;
+            	}
+            	
+            	Condi += "movie.director LIKE \'%"+Director+"%\'";
+            	isExistCondition = true;
+            }
+            if(Actor != "") {
+            	if(isExistCondition) {
+            		Condi += " AND ";
+            	}
+            	else {
+            		isExistCondition = true;
+            	}
+            	
+            	Condi += "movie.actor LIKE \'%"+Actor+"%\'";
+            	isExistCondition = true;
+            }
+            if(Genre != "") {
+            	if(isExistCondition) {
+            		Condi += " AND ";
+            	}
+            	else {
+            		isExistCondition = true;
+            	}
+            	
+            	Condi += "movie.genre = \'"+Genre+"\'";
+            	isExistCondition = true;
+            }
+            if(isExistCondition) {
+            	query += Condi;
+            }
+            query +=";";
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(query);
+
+                // 테이블 헤더 출력
+                format = "| %-8s | %-20s | %-10s | %-40s | %-60s | %-30s | %-50s | %-10s | %-4s |%n";
+                System.out.format(format, "MovieID", "MovieName", "MovieGrade", "Director", "Actor", "Genre", "MovieSummary", "OpenDate", "Rate");
+                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                header = String.format(format, "MovieID", "MovieName", "MovieGrade", "Director", "Actor", "Genre", "MovieSummary", "OpenDate", "Rate");
+                returnResult.add(header);
+                returnResult.add("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                // 결과 출력
+                while (resultSet.next()) {
+                    int movieId = resultSet.getInt("movieId");
+                    String movieName = resultSet.getString("movieName");
+                    int moveGrade = resultSet.getInt("moveGrade");
+                    String director = resultSet.getString("director");
+                    String actor = resultSet.getString("actor");
+                    String genre = resultSet.getString("genre");
+                    String movieSummary = resultSet.getString("movieSummary");
+                    String openDate = resultSet.getDate("openDate").toString();
+                    int rate = resultSet.getInt("rate");
+
+                    String row = String.format(format, movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate);
+                    returnResult.add(row);
+                    System.out.println(row);
+                    
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return returnResult;
+	}
 	
+	public static List<String> seatBySchedule(int scheduleID){
+		//스케쥴 아이디 입력
+		//출력 첫째 줄 : 해당 스케쥴의 room 좌석 가로 수 세로 수 ex) 20,15
+		//출력 둘째 줄 : 해당 스케쥴의 room 속 예매된 좌석 좌표들 ex) 12,2 14,5 20,1
+		List<String> returnResult = new ArrayList<>();
+		String jdbcUrl = "jdbc:mysql://localhost:3306/db1";
+        String jdbcUser = "user1";
+        String jdbcPassword = "user1";
+        String query;
+        String query2;
+        String query3;
+        // 데이터베이스 연결
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
+            // SELECT 쿼리 실행
+            query = "SELECT * FROM showSchedule WHERE showSchedule.showScheduleId = "+scheduleID+";"; // 
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(query);
+                int tRoomId = -1;
+                if (resultSet.next()) {
+                    tRoomId = resultSet.getInt("roomId");
+                }
+                query2 = "SELECT * FROM room WHERE room.roomId = " + tRoomId + ";";
+                resultSet = statement.executeQuery(query2);
+                if (resultSet.next()) {
+                    int seatC = resultSet.getInt("seatCol");
+                    int seatR = resultSet.getInt("seatRow");
+                    String line = seatC + "," + seatR;
+                    returnResult.add(line);
+                    System.out.println(line);
+                }
+                query3 = "SELECT * FROM seat WHERE seat.showScheduleId = "+scheduleID+";";
+                resultSet = statement.executeQuery(query3);
+                String line="";
+                while (resultSet.next()) {
+                    int seatC = resultSet.getInt("colX");
+                    int seatR = resultSet.getInt("rowY");
+                    line += seatC + "," + seatR +" ";
+                }
+                returnResult.add(line);
+                System.out.println(line);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return returnResult;
+	}
 	
+	public static int bookTicket(int n, int[] colx, int[] rowy, int[] ticketPrice, int scheduleid, String paymethod) {
+        String query = "";
+        int tRoomId = -1;
+	    try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")){
+    		query = "SELECT * FROM showSchedule WHERE showSchedule.showScheduleId = "+scheduleid+";"; // 
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(query);
+                if (resultSet.next()) {
+                    tRoomId = resultSet.getInt("roomId");
+                }
+                int totalPrice = 0;
+                for(int i=0; i<n;i++) {
+                	totalPrice += ticketPrice[i];
+	                query = "INSERT INTO seat (roomId, isUsed, colX, rowY, showScheduleId) VALUE ("+tRoomId 
+	                		+","+1+","+colx[i]+","+rowy[i]+","+scheduleid+");";
+	                statement.executeUpdate(query);
+                }
+                
+                query = "INSERT INTO payInfo (payMethod, payState, price, userId, payDate) VALUE (\'"+paymethod+"\',"+0+","+totalPrice+", \'user1\', curdate());";
+                statement.executeUpdate(query);
+                
+                for(int i=0; i<n;i++) {
+	                query = "INSERT INTO ticket (showScheduleId, roomId, seatId, PayID, isPrinted, averageSale, price) VALUE ("+scheduleid
+	                		+","+tRoomId+", (select seatId from seat where showScheduleId = "+scheduleid+" and colX = " +colx[i]+" and rowY = "+rowy[i]+" ),(select max(payInfo.payId) from payInfo), 0,"+ticketPrice[i]+","+ticketPrice[i]+");";
+	                statement.executeUpdate(query);
+                }
+	        }
+	    } catch (SQLException e) {
+	        return -1;
+	    }
+		return 0;
+	}
 	
+	public static int cancelPay(int payID) {
+		String query = "";
+        int tRoomId = -1;
+	    try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")){
+            try (Statement statement = connection.createStatement()) {
+            	query = "SELECT * FROM ticket WHERE ticket.payId = "+payID+";";
+                ResultSet resultSet = statement.executeQuery(query);
+                List <Integer> seatsToDelete = new ArrayList<>();
+                int n = 0;
+                while (resultSet.next()) {
+                	n += 1;
+                	seatsToDelete.add(resultSet.getInt("seatId"));
+                }
+                query = "DELETE from ticket WHERE ticket.payId = "+payID+";";
+                statement.executeUpdate(query);
+                
+                for(int i=0; i<n;i++) {
+                	query = "DELETE from seat WHERE seat.seatId = "+seatsToDelete.removeFirst()+";";
+                    statement.executeUpdate(query);
+                }
+                query = "DELETE from payInfo WHERE payInfo.payId = "+payID+";";
+                statement.executeUpdate(query);
+            }
+	    } catch (SQLException e) {
+            e.printStackTrace();
+	        return -1;
+	    }
+		return 0;
+	}
+	
+	/*public static List<String> checkMyPayment(){
+		List<String> returnResult = new ArrayList<>();
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM payInfo WHERE payInfo.userId = user1;";
+                ResultSet resultSet = statement.executeQuery(query);
+                
+                String format = "| %-8s | %-20s | %-8s | %-8s | %-20s | %-10s |%n";
+                
+                System.out.format(format, "PayID", "PayMethod", "PayState", "Price", "UserID", "PayDate");
+                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                String header = String.format(format, "PayID", "PayMethod", "PayState", "Price", "UserID", "PayDate");
+                returnResult.add(header);
+                returnResult.add("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+                
+                while (resultSet.next()) {
+                    int seatC = resultSet.getInt("colX");
+                    int seatR = resultSet.getInt("rowY");
+                    String row = String.format(format, movieId, movieName, moveGrade, director, actor, genre, movieSummary, openDate, rate);
+                    returnResult.add(row);
+                    System.out.println(row);
+                }
+                returnResult.add(line);
+                System.out.println(line);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return returnResult;
+	}
+	*/
 	public static void main (String[] args) {
 		
 		init();
 		//delete("movie", "movie.movieId=3");
 		//update("movie", "movie.movieName = \'test1\'", "movie.movieId = 3");
 		//printAllTable();
+		//printMovie("Midnight Sun","","Nicholas Ward","");
+		//seatBySchedule(4);
+		/*int [] x = {3,4};
+		int [] y = {5,6};
+		int [] pay = {12345,34252};
+		bookTicket(2, x, y, pay, 4,"Cash");
+		printAllTable();
+		cancelPay(16);
+		printAllTable();*/
 		
-		/*
-		 * try { Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL 드라이버 로드 Connection
-		 * conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1",
-		 * "root","1234"); // JDBC 연결 System.out.println("DB 연결 완료"); } catch
-		 * (ClassNotFoundException e) { System.out.println("JDBC 드라이버 로드 오류"); } catch
-		 * (SQLException e) { System.out.println("DB 연결 오류"); }
-		 */
+		
 	}
 }
