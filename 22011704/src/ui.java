@@ -348,8 +348,8 @@ public class ui {
 			                        List<String> returnResult = db1.seatBySchedule(number);
 			                        int c = Integer.parseInt(values[2]);
 			                        int r = Integer.parseInt(values[3]);
-			                        String limit = returnResult.removeFirst();
-			                        String [] limitParts = limit.split(",", 2);
+			                        String limit = returnResult.remove(0);
+			                        String [] limitParts = limit.strip().split(",", 2);
 			                        int rc = Integer.parseInt(limitParts[0].strip());
 			                        int cc = Integer.parseInt(limitParts[1].strip());
 			                        if(c>=cc || r >= rc || c < 0 || r<0) {
@@ -622,7 +622,7 @@ public class ui {
 		    public void openSeatBookingUI(String movieName, String directorName, String actorName, String genre, int scheduleIdInput) {
 		        // 좌석 예매 UI를 새로운 창으로 띄웁니다.
 		    	List<String> replySeat = db1.seatBySchedule(scheduleIdInput);
-		    	String reserved = replySeat.removeLast();
+		    	String reserved = replySeat.remove(replySeat.size()-1);
 		    	List<String> reservedSeats = Arrays.asList(reserved.split(" "));//&여기 연결 
 		        new SeatBookingUI(movieName, directorName, actorName, genre,reservedSeats ,scheduleIdInput).setVisible(true);
 		    }
@@ -715,7 +715,7 @@ public class ui {
 		        };
 		        
 		        List<String> replySeat = db1.seatBySchedule(inputScheduleID);
-		    	String numOfSeats = replySeat.removeFirst();
+		    	String numOfSeats = replySeat.remove(0);
 		    	cols = Integer.parseInt(numOfSeats.strip().split(",")[0]);
 		    	rows = Integer.parseInt(numOfSeats.strip().split(",")[1]);
 		        for (int i = 0; i < cols; i++) {
@@ -1111,7 +1111,7 @@ public class ui {
 
 	        private void changeMovieAction(ActionEvent e) {
                 String s_movie = (String)(comboBox.getSelectedItem());
-                String [] tns_m = s_movie.split(" ",2);
+                String [] tns_m = s_movie.strip().split(" ",2);
                 int m_id = Integer.parseInt(tns_m[0].strip());
                 int sche = db1.scheduleIdFromMovieId(m_id);
                 if(sche<0) {
@@ -1121,12 +1121,12 @@ public class ui {
                 	int room = db1.roomIdFromscheduleId(sche);
 
                     List<String> seatResult = db1.seatBySchedule(sche);
-                    String limit = seatResult.removeFirst();
-                    String [] limitParts = limit.split(",", 2);
+                    String limit = seatResult.remove(0);
+                    String [] limitParts = limit.strip().split(",", 2);
                     int rc = Integer.parseInt(limitParts[0].strip());
                     int rr = Integer.parseInt(limitParts[1].strip());
-                    limit = seatResult.removeFirst();
-                    limitParts = limit.split(" ");
+                    limit = seatResult.remove(0);
+                    limitParts = limit.strip().split(" ");
                     boolean isAlreadyBooked = false;
     		        List<String> checkSeat = db1.showDetailPayment(inputPayId_IN);
     		        for (String item : checkSeat) {
@@ -1185,13 +1185,13 @@ public class ui {
 		        		return;
 		        	}
 	                List<String> seatResult = db1.seatBySchedule(schID);
-	                String limit = seatResult.removeFirst();
-	                String [] limitParts = limit.split(",", 2);
+	                String limit = seatResult.remove(0);
+	                String [] limitParts = limit.strip().split(",", 2);
 	                int rc = Integer.parseInt(limitParts[0].strip());
 	                int rr = Integer.parseInt(limitParts[1].strip());
 	                
-	                limit = seatResult.removeFirst();
-                    limitParts = limit.split(" ", 2);
+	                limit = seatResult.remove(0);
+                    limitParts = limit.strip().split(" ");
                     boolean isAlreadyBooked = false;
     		        List<String> checkSeat = db1.showDetailPayment(inputPayId_IN);
     		        for (String item : checkSeat) {

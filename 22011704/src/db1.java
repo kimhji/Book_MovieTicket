@@ -470,7 +470,7 @@ public class db1 {
         	System.out.println("Deleted " + rowsAffected + " rows from table " + tableName);
 	        
 	    } catch (SQLException e) {
-	        //e.printStackTrace();
+	        e.printStackTrace();
 	        return -1;
 	    }
 		return rowsAffected; //삭제 시 삭제된 row 수(0 이상이 정상 실행)
