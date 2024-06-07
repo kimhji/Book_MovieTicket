@@ -96,7 +96,6 @@ public class ui {
 		class AdminUI extends JFrame  implements ActionListener {
 		    private JTextField conditionTextField, conditionTableField;
 		    private JButton deleteButton, updateButton, resetButton, retrieveButton, insertButton;
-		    private JTable dataTable;
 		    private JComboBox<String> tableComboBox;
 		    private JTextField[] inputFields;
 		    private JLabel[] inputLabels;
@@ -351,8 +350,8 @@ public class ui {
 			                        int r = Integer.parseInt(values[3]);
 			                        String limit = returnResult.removeFirst();
 			                        String [] limitParts = limit.split(",", 2);
-			                        int rc = Integer.parseInt(limitParts[0]);
-			                        int cc = Integer.parseInt(limitParts[1]);
+			                        int rc = Integer.parseInt(limitParts[0].strip());
+			                        int cc = Integer.parseInt(limitParts[1].strip());
 			                        if(c>=cc || r >= rc || c < 0 || r<0) {
 			                        	JOptionPane.showMessageDialog(null, "정해진 좌석 수를 벗어나는 좌석 좌표를 입력했습니다.", "error", JOptionPane.ERROR_MESSAGE);
 			                        	return;
@@ -946,19 +945,48 @@ public class ui {
 		}
 		
 		class DetailedreservationUI extends JFrame {
-		    public DetailedreservationUI(int inputPayId, DefaultListModel<String> inputList) {
 
-			     // 리스트 모델 설정
-				 DefaultListModel<String> listModel = new DefaultListModel<>();
-			     // 리스트 생성 및 모델 할당
-			     JList<String> list = new JList<>(listModel);
+	        public JTextField moviechangeField;
+	        public JTextField timechangeField;
+	        private JComboBox<String> comboBox;
+	     // 리스트 모델 설정
+			DefaultListModel<String> listModel = new DefaultListModel<>();
+		     // 리스트 생성 및 모델 할당
+		    JList<String> list = new JList<>(listModel);
+		    int inputPayId_IN = -1;
+	        private int selectedReservationIndex = -1; // 이용해서 조회한거 저장 
+	        private Vector<Object[]> detailedData; // 예매 정보를 저장하는 벡터 => stinglist
+		    public DetailedreservationUI(int inputPayId, DefaultListModel<String> inputList) {
+		    	comboBox = new JComboBox<>(db1.getMovieList());
+		    	
+		    	inputPayId_IN = inputPayId;
 		        setTitle("예매 시스템");
 		        setSize(800, 500);
 		        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		        setLocationRelativeTo(null);
 		        setLayout(new BorderLayout());
+		        List<String> result = db1.showDetailPayment(inputPayId);
+            	listModel.clear();
+            	for (String item : result) {
+                    if (!listModel.contains(item)) {
+                        listModel.addElement(item);
+                    }
+                }
+            	addWindowListener(new WindowAdapter() {
+		            @Override
+		            public void windowClosed(WindowEvent e) {
+		            	inputList.clear();
+		            	List<String> resultT = db1.checkMyPayment();
+		            	inputList.clear();
+		            	for (String item : resultT) {
+		                    if (!inputList.contains(item)) {
+		                    	inputList.addElement(item);
+		                    }
+		                }
+		            }
+		        });
 		        
-		        JScrollPane scrollPane = new JScrollPane(list);
+		        /*JScrollPane scrollPane = new JScrollPane(list);
 
 		        // 패널 생성 및 테두리 설정
 		        JPanel panel = new JPanel(new BorderLayout());
@@ -967,13 +995,7 @@ public class ui {
 
 		        // 프레임에 패널 추가
 		        add(panel, BorderLayout.CENTER);
-		        List<String> result = db1.showDetailPayment(inputPayId);
-            	listModel.clear();
-            	for (String item : result) {
-                    if (!listModel.contains(item)) {
-                        listModel.addElement(item);
-                    }
-                }
+		        
             	JPanel panel2 = new JPanel(new GridLayout(3, 1, 10, 10));
             	add(panel2, BorderLayout.EAST);
             	JButton delete = new JButton("delete");
@@ -1006,128 +1028,232 @@ public class ui {
 		                }
 		                dispose();
 		            }
-		        });
+		        });*/
 		        //detailedData = new Vector<>();
-		        //initializeUI();
+		        initializeUI();
 		    }
 
-			    private void initializeUI() {
-			        // 왼쪽 패널 (테이블)
-			        JPanel leftPanel = new JPanel(new BorderLayout());
-			        String[] columnNames = {"예매 번호", "영화", "상영일정", "상영관", "티켓 정보"};
-			        tableModel = new DefaultTableModel(columnNames, 0);
-			        table = new JTable(tableModel);
-			        JScrollPane scrollPane = new JScrollPane(table);
-			        leftPanel.add(scrollPane, BorderLayout.CENTER);
+	        private void initializeUI() {
+	            // 왼쪽 패널 (리스트)
+	            JPanel leftPanel = new JPanel(new BorderLayout());
+	            list = new JList<>(listModel);
+	            JScrollPane scrollPane = new JScrollPane(list);
+	            leftPanel.add(scrollPane, BorderLayout.CENTER);
 
-			        // 예매 정보 추가 예시
-			        addReservationData(new Object[]{"1", "Movie 1", "2024-06-01 14:00", "Theater 1", "A1"});
-			        addReservationData(new Object[]{"2", "Movie 2", "2024-06-02 16:00", "Theater 2", "B2"});
+	            
+	            // 오른쪽 패널 (검색 필드와 버튼들)
+	            JPanel rightPanel = new JPanel();
+	            rightPanel.setLayout(new GridBagLayout());
+	            GridBagConstraints gbc = new GridBagConstraints();
+	            gbc.insets = new Insets(5, 5, 5, 5);
+	              
+	            JButton checkButton = new JButton("확인");
+	            JButton changeMovieButton = new JButton("영화 변경");
+	            JButton changeScheduleButton = new JButton("일정 변경");
+	            JButton deleteReservationButton = new JButton("예매 삭제");
 
-			        // 오른쪽 패널 (검색 필드와 버튼들)
-			        JPanel rightPanel = new JPanel();
-			        rightPanel.setLayout(new GridBagLayout());
-			        GridBagConstraints gbc = new GridBagConstraints();
-			        gbc.insets = new Insets(5, 5, 5, 5);
-			        
-			        searchField = new JTextField(10);	     
-			        JButton searchButton = new JButton("조회");
-			        JButton changeMovieButton = new JButton("영화 변경");
-			        JButton changeScheduleButton = new JButton("일정 변경");
-			        JButton deleteReservationButton = new JButton("예매 삭제");
+	            checkButton.addActionListener(this::searchAction);
+	            changeMovieButton.addActionListener(this::changeMovieAction);
+	            changeScheduleButton.addActionListener(this::changeScheduleAction);
+	            deleteReservationButton.addActionListener(this::deleteReservationAction);
+	            
+	            
 
-			        searchButton.addActionListener(this::searchAction);
-			        changeMovieButton.addActionListener(this::changeMovieAction);
-			        changeScheduleButton.addActionListener(this::changeScheduleAction);
-			        deleteReservationButton.addActionListener(this::deleteReservationAction);
-			     // 검색 필드와 조회 버튼을 한 줄에 배치
-			        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			        searchPanel.add(searchField);
-			        searchPanel.add(searchButton);
-			        
-			        gbc.gridx = 0;
-			        gbc.gridy = 0;
-			        gbc.gridwidth = 2;
-			        rightPanel.add(searchPanel, gbc);
+	         // 변경 날짜 및 영화 필드 추가
+	            JLabel moviechangeLabel = new JLabel("변경 영화:");
+	            moviechangeField = new JTextField(10);
+	            JLabel timechangeLabel = new JLabel("변경 날짜:");
+	            timechangeField = new JTextField(10);
 
-			        gbc.gridx = 0;
-			        gbc.gridy = 1;
-			        rightPanel.add(changeMovieButton, gbc);
+	            gbc.gridx = 0;
+	            gbc.gridy = 1;
+	            gbc.gridwidth = 1;
+	            rightPanel.add(moviechangeLabel, gbc);
+	            gbc.gridx = 1;
+	            gbc.gridy = 1;
+	            rightPanel.add(comboBox, gbc);
 
-			        gbc.gridx = 0;
-			        gbc.gridy = 2;
-			        rightPanel.add(changeScheduleButton, gbc);
+	            gbc.gridx = 0;
+	            gbc.gridy = 2;
+	            gbc.gridwidth = 1;
+	            rightPanel.add(timechangeLabel, gbc);
+	            gbc.gridx = 1;
+	            gbc.gridy = 2;
+	            rightPanel.add(timechangeField, gbc);
 
-			        gbc.gridx = 0;
-			        gbc.gridy = 3;
-			        rightPanel.add(deleteReservationButton, gbc);
+	            gbc.gridx = 0;
+	            gbc.gridy = 3;
+	            gbc.gridwidth = 2;
+	            rightPanel.add(changeMovieButton, gbc);
 
-			        // 여백 추가
-			        rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-			        leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-			        add(leftPanel, BorderLayout.CENTER);
-			        add(rightPanel, BorderLayout.EAST);
-			        setVisible(true);
-			    }
+	            gbc.gridx = 0;
+	            gbc.gridy = 4;
+	            rightPanel.add(changeScheduleButton, gbc);
 
-			    private void addReservationData(Object[] data) {
-			        detailedData.add(data);
-			        tableModel.addRow(data);
-			    }
+	            gbc.gridx = 0;
+	            gbc.gridy = 5;
+	            rightPanel.add(deleteReservationButton, gbc);
+	            gbc.gridx = 0;
+	            gbc.gridy = 6;
+	            rightPanel.add(checkButton, gbc);
+	              // 여백 추가
+	            rightPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+	            leftPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+	            add(leftPanel, BorderLayout.CENTER);
+	            add(rightPanel, BorderLayout.EAST);
+	            setVisible(true);
+	        }
+	        
 
-			    private void searchAction(ActionEvent e) {
-			        String searchText = searchField.getText().trim();
-			        for (Object[] row : detailedData) {
-			            if (row[0].equals(searchText)) {
-			                JOptionPane.showMessageDialog(this, "예매 번호: " + row[0] + "\n영화: " + row[1] + "\n상영일정: " + row[2] + "\n상영관: " + row[3] + "\n티켓 정보: " + row[4], "예매 정보", JOptionPane.INFORMATION_MESSAGE);
-			                return;
-			            }
-			        }
-			        JOptionPane.showMessageDialog(this, "해당 예매 번호를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-			    }
+	        private void searchAction(ActionEvent e) {
+	            dispose();
+	        }
 
-			    private void changeMovieAction(ActionEvent e) {
-			    	//여기 수정 
-			        int selectedRow = table.getSelectedRow();
-			        if (selectedRow == -1) {
-			            JOptionPane.showMessageDialog(this, "변경할 예매를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
-			            return;
-			        }
-			        String movieName = JOptionPane.showInputDialog(this, "새 영화명을 입력하세요:");
-			        if (movieName != null && !movieName.trim().isEmpty()) {
-			            tableModel.setValueAt(movieName, selectedRow, 1);
-			            detailedData.get(selectedRow)[1] = movieName;
-			            JOptionPane.showMessageDialog(this, "영화가 변경되었습니다.", "변경 완료", JOptionPane.INFORMATION_MESSAGE);
-			        }
-			    }
+	        private void changeMovieAction(ActionEvent e) {
+                String s_movie = (String)(comboBox.getSelectedItem());
+                String [] tns_m = s_movie.split(" ",2);
+                int m_id = Integer.parseInt(tns_m[0].strip());
+                int sche = db1.scheduleIdFromMovieId(m_id);
+                if(sche<0) {
+                	JOptionPane.showMessageDialog(null, "해당 영화의 상영 일정이 없습니다.", "error", JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                	int room = db1.roomIdFromscheduleId(sche);
 
-			    private void changeScheduleAction(ActionEvent e) {
-			        int selectedRow = table.getSelectedRow();
-			        if (selectedRow == -1) {
-			            JOptionPane.showMessageDialog(this, "변경할 예매를 선택해주세요.", "오류", JOptionPane.ERROR_MESSAGE);
-			            return;
-			        }
-			        String schedule = JOptionPane.showInputDialog(this, "새 상영 일정을 입력하세요 ");
-			        if (schedule != null && !schedule.trim().isEmpty()) {
-			            tableModel.setValueAt(schedule, selectedRow, 2);
-			            detailedData.get(selectedRow)[2] = schedule;
-			            JOptionPane.showMessageDialog(this, "상영 일정이 변경되었습니다.", "변경 완료", JOptionPane.INFORMATION_MESSAGE);
-			        }
-			    }
+                    List<String> seatResult = db1.seatBySchedule(sche);
+                    String limit = seatResult.removeFirst();
+                    String [] limitParts = limit.split(",", 2);
+                    int rc = Integer.parseInt(limitParts[0].strip());
+                    int rr = Integer.parseInt(limitParts[1].strip());
+                    limit = seatResult.removeFirst();
+                    limitParts = limit.split(" ");
+                    boolean isAlreadyBooked = false;
+    		        List<String> checkSeat = db1.showDetailPayment(inputPayId_IN);
+    		        for (String item : checkSeat) {
+                        if (item.contains("seat")) {
+                            String [] loc = item.split(" : ");
+                            String realL = loc[1];
+                            String [] c_r = realL.split("-");
+                            
+                            int c = Integer.parseInt(c_r[0].strip());
+                            int r = Integer.parseInt(c_r[1].strip());
+                            
+                            for (int i = 0; i<limitParts.length;i++) {
+                            	realL = limitParts[i];
+                            	c_r = realL.split("-");
+                            	int lC = Integer.parseInt(c_r[0].strip());
+                            	int lR = Integer.parseInt(c_r[1].strip());
+                            	
+                            	if(c == lC && r == lR) {
+                            		isAlreadyBooked = true;
+                            		break;
+                            	}
+                            }
+                            if (c>rc || r>rr || isAlreadyBooked) {
+                            	JOptionPane.showMessageDialog(null, "변경 후의 상영관에 기존 좌석으로 예매할 수 없습니다.", "error", JOptionPane.ERROR_MESSAGE);
+                                
+                            	return;
+                            }
+                        }
+                    }
+                    
+                    String setOr = "ticket.showScheduleId="+sche;
+                    String whereOr = "ticket.payId = "+inputPayId_IN;
+                	db1.update("ticket", setOr, whereOr);
+                	setOr = "ticket.roomId ="+room;
+                	db1.update("ticket", setOr, whereOr);
+                	
+                	List<String> result = db1.showDetailPayment(inputPayId_IN);
+                	listModel.clear();
+                	for (String item : result) {
+                        if (!listModel.contains(item)) {
+                            listModel.addElement(item);
+                        }
+                    }
+                }
+	        }
 
-			    private void deleteReservationAction(ActionEvent e) {
-			        String searchText = searchField.getText().trim();
-			        for (int i = 0; i < detailedData.size(); i++) {
-			            if (detailedData.get(i)[0].equals(searchText)) {
-			                detailedData.remove(i);
-			                tableModel.removeRow(i);
-			                JOptionPane.showMessageDialog(this, "예매가 삭제되었습니다.", "예매 삭제", JOptionPane.INFORMATION_MESSAGE);
-			                return;
-			            }
-			        }
-			        JOptionPane.showMessageDialog(this, "해당 예매 번호를 찾을 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-			    }
-		}
+	        private void changeScheduleAction(ActionEvent e) {
+	            try {
+	            	int preschID = db1.scheduleIdFromPayid(inputPayId_IN);
+	            	int premovieId = db1.movieIdFromscheduleId(preschID);
+	            	int schID = Integer.parseInt(timechangeField.getText().strip());
+		        	int room = db1.roomIdFromscheduleId(schID);
+		        	int movieID = db1.movieIdFromscheduleId(schID);
+		        	if(premovieId != movieID) {
+		        		JOptionPane.showMessageDialog(null, "같은 영화의 스케쥴 값이 아닙니다.", "error", JOptionPane.ERROR_MESSAGE);
+		        		return;
+		        	}
+	                List<String> seatResult = db1.seatBySchedule(schID);
+	                String limit = seatResult.removeFirst();
+	                String [] limitParts = limit.split(",", 2);
+	                int rc = Integer.parseInt(limitParts[0].strip());
+	                int rr = Integer.parseInt(limitParts[1].strip());
+	                
+	                limit = seatResult.removeFirst();
+                    limitParts = limit.split(" ", 2);
+                    boolean isAlreadyBooked = false;
+    		        List<String> checkSeat = db1.showDetailPayment(inputPayId_IN);
+    		        for (String item : checkSeat) {
+                        if (item.contains("seat")) {
+                            String [] loc = item.split(" : ");
+                            String realL = loc[1];
+                            String [] c_r = realL.split("-");
+                            
+                            int c = Integer.parseInt(c_r[0].strip());
+                            int r = Integer.parseInt(c_r[1].strip());
+                            
+                            for (int i = 0; i<limitParts.length;i++) {
+                            	realL = limitParts[i];
+                            	c_r = realL.split("-");
+                            	int lC = Integer.parseInt(c_r[0].strip());
+                            	int lR = Integer.parseInt(c_r[1].strip());
+                            	
+                            	if(c == lC && r == lR) {
+                            		isAlreadyBooked = true;
+                            		break;
+                            	}
+                            }
+                            if (c>rc || r>rr || isAlreadyBooked) {
+                            	JOptionPane.showMessageDialog(null, "변경 후의 상영관에 기존 좌석으로 예매할 수 없습니다.", "error", JOptionPane.ERROR_MESSAGE);
+                                
+                            	return;
+                            }
+                        }
+                    }
+	                
+	                String setOr = "ticket.showScheduleId="+schID;
+	                String whereOr = "ticket.payId = "+inputPayId_IN;
+	              	if(db1.update("ticket", setOr, whereOr)<0) {
+	              		JOptionPane.showMessageDialog(null, "잘못된 값입니다.", "error", JOptionPane.ERROR_MESSAGE);
+	              	}
+	              	setOr = "ticket.roomId ="+room;
+	              	db1.update("ticket", setOr, whereOr);
+	              	
+	              	List<String> result = db1.showDetailPayment(inputPayId_IN);
+	              	listModel.clear();
+	              	for (String item : result) {
+	                      if (!listModel.contains(item)) {
+	                          listModel.addElement(item);
+                    }
+	            }
+	          }
+	          catch(NumberFormatException e1) {
+	        	  JOptionPane.showMessageDialog(null, "스케쥴 ID 값을 입력해주세요.", "error", JOptionPane.ERROR_MESSAGE);
+	          }
+	        }
+
+	        private void deleteReservationAction(ActionEvent e) {
+	        	int result = db1.cancelPay(inputPayId_IN);
+                if (result<0) {
+                	JOptionPane.showMessageDialog(null, "데이터에 잘못된 값이 있습니다.", "error", JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                	dispose();
+                }
+	        }
+	    }
+
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		/*

@@ -485,6 +485,7 @@ public class db1 {
         	System.out.println("Updated " + rowsAffected + " rows from table " + tableName);
 	        
 	    } catch (SQLException e) {
+            e.printStackTrace();
 	        return -1;
 	    }
 		return 0;
@@ -873,6 +874,107 @@ public class db1 {
             return -1;
         }
         return result;
+	}
+	
+	public static int roomIdFromscheduleId(int s_id) {
+		int result = -1;
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM showSchedule WHERE showSchedule.showScheduleId = "+s_id+";";
+                ResultSet resultSet = statement.executeQuery(query);
+                
+         
+                if (resultSet.next()) {
+                	result = resultSet.getInt("roomId");
+                }
+            }
+            
+    	}
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return result;
+	}
+	
+	public static int movieIdFromscheduleId(int s_id) {
+		int result = -1;
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM showSchedule WHERE showSchedule.showScheduleId = "+s_id+";";
+                ResultSet resultSet = statement.executeQuery(query);
+                
+         
+                if (resultSet.next()) {
+                	result = resultSet.getInt("movieId");
+                }
+            }
+            
+    	}
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return result;
+	}
+	
+	public static int scheduleIdFromPayid(int p_id) {
+		int result = -1;
+		try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/db1", "user1", "user1")) {
+            try (Statement statement = connection.createStatement()) {
+                
+                String query = "SELECT * FROM ticket WHERE ticket.payId = "+p_id+";";
+                ResultSet resultSet = statement.executeQuery(query);
+                
+         
+                if (resultSet.next()) {
+                	result = resultSet.getInt("showScheduleId");
+                }
+            }
+            
+    	}
+        catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+        return result;
+	}
+	
+	public static String [] getMovieList() {
+		List<String> returnResult = new ArrayList<>();
+		String jdbcUrl = "jdbc:mysql://localhost:3306/db1"; // 데이터베이스 URL
+        String jdbcUser = "user1"; // MySQL 사용자 이름
+        String jdbcPassword = "user1"; // MySQL 사용자 비밀번호
+        String query;
+        int num = 0;
+        // 데이터베이스 연결
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword)) {
+            // SELECT 쿼리 실행
+            query = "SELECT * FROM movie;"; // 테이블 이름을 원하는 대로 변경하세요
+            try (Statement statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(query);
+
+                while (resultSet.next()) {
+                    int movieId = resultSet.getInt("movieId");
+                    String movieName = resultSet.getString("movieName");
+
+                    String row = movieId + " "+ movieName;
+                    returnResult.add(row);
+                    System.out.println(row);
+                    num += 1;
+                }
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        
+        String[] stringArray = returnResult.toArray(new String[0]);
+
+        return stringArray;
 	}
 	
 	public static void main (String[] args) {
